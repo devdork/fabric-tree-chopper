@@ -1,3 +1,9 @@
+A fork of fabric-tree-chopper to add the behaviour from ChopDownUpdate.
+
+Thanks to [@copygirl](https://github.com/copygirl) for helping me with BlockStates and IDEA.
+
+---
+
 [![](http://cf.way2muchnoise.eu/short_fabric-tree-chopper_downloads.svg)](https://www.curseforge.com/minecraft/mc-mods/fabric-tree-chopper)
 [![](http://cf.way2muchnoise.eu/versions/fabric-tree-chopper_all.svg)](https://www.curseforge.com/minecraft/mc-mods/fabric-tree-chopper)
 [![](http://cf.way2muchnoise.eu/packs/short_fabric-tree-chopper.svg)](https://www.curseforge.com/minecraft/mc-mods/fabric-tree-chopper)

@@ -201,7 +201,8 @@ fun treeFeller(originalBlockState: BlockState, world: World, blockPos: BlockPos,
             originalBlockState.with(Properties.AXIS, Direction.Axis.X)
         }
         // TODO: Remove the leaves from the tree being cut down.
-        // TODO: Modify the mixiins to allow hand-usage or use a callback(?)
+        // TODO: Fix rotation to use a separate function so that branches rotate correctly instead of being inline with the tree direction.
+        // TODO: Modify the mixins to allow hand-usage or use a callback(?)
         // TODO: Make it so that you have to cut through the entire trunk of a 2x2 or such tree to cut it down.
         println(originalBlockState)
         println(newPos)
