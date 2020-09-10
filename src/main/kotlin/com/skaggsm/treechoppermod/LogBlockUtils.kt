@@ -9,8 +9,11 @@ import net.minecraft.entity.ItemEntity
 import net.minecraft.entity.LivingEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.util.math.BlockPos
+import net.minecraft.block.FallingBlock
+import net.minecraft.entity.FallingBlockEntity
 import net.minecraft.util.math.Vec3i
 import net.minecraft.world.World
+import kotlin.math.abs
 
 private val BlockState.isNaturalLeaf: Boolean
     get() {
@@ -133,11 +136,76 @@ fun maybeBreakAllLogs(originalBlockState: BlockState, world: World, blockPos: Bl
     ))
 }
 
+enum class SignDirection {
+    Pos, Neg
+}
+
+enum class FaceDirection {
+    X, Z
+}
+
+fun getFaceDirection(livingEntity: LivingEntity, blockPos: BlockPos): Pair<SignDirection, FaceDirection> {
+    val x = ((blockPos.x + 0.5) - livingEntity.pos.x)
+    val z = ((blockPos.z + 0.5) - livingEntity.pos.z)
+    val aX = abs(x)
+    val aZ = abs(z)
+    val direction: FaceDirection
+    val sign: SignDirection
+    if (aX > aZ) {
+        direction = FaceDirection.Z
+        sign = if (blockPos.z > livingEntity.pos.z) {
+            SignDirection.Pos
+        } else {
+            SignDirection.Neg
+        }
+    } else {
+        direction = FaceDirection.X
+        sign = if (blockPos.x > livingEntity.pos.x) {
+            SignDirection.Pos
+        } else {
+            SignDirection.Neg
+        }
+    }
+    return Pair(sign, direction)
+}
+
+fun calculateFallOffset(basePos: BlockPos, logPos: BlockPos, signDir: SignDirection, faceDir: FaceDirection): Vec3i {
+    val heightDifference = logPos.y - basePos.y
+    val newPos = if (signDir == SignDirection.Pos) {
+        if (faceDir == FaceDirection.Z) {
+            Vec3i(logPos.x, basePos.y + 1, basePos.z + heightDifference)
+        } else {
+            Vec3i(basePos.x + heightDifference, basePos.y + 1, logPos.z)
+        }
+    } else {
+        if (faceDir == FaceDirection.Z) {
+            Vec3i(logPos.x, basePos.y + 1, basePos.z - heightDifference)
+        } else {
+            Vec3i(basePos.x - heightDifference, basePos.y + 1, logPos.z)
+        }
+    }
+    return newPos
+}
+
+fun treeFeller(originalBlockState: BlockState, world: World, blockPos: BlockPos, itemStack_1: ItemStack, livingEntity: LivingEntity) {
+    val logs = findAllLogsAbove(originalBlockState, world, blockPos)
+    val (sign, face) = getFaceDirection(livingEntity, blockPos)
+    for (log in logs) {
+        world.breakBlock(log, false)
+        val newPos = calculateFallOffset(blockPos, log, sign, face)
+        // val newBlockState = ...
+        // TODO: change the BlockState so that the "face" property is set to the value contained in face
+        // TODO: spawn an entity of a correctly faced (BlockState fixed) log at the position provided by newPos
+        //world.spawnEntity(FallingBlockEntity(world, newPos.x.toDouble(), newPos.y.toDouble(), newPos.z.toDouble(), newBlockState))
+    }
+}
+
 fun tryLogBreak(itemStack_1: ItemStack, world_1: World, blockState_1: BlockState, blockPos_1: BlockPos, livingEntity_1: LivingEntity) {
     if (blockState_1.isChoppable && !(livingEntity_1.isSneaking && config.sneakToDisable)) {
         when (config.treeChopMode) {
             ChopMode.FULL_CHOP -> maybeBreakAllLogs(blockState_1, world_1, blockPos_1, itemStack_1, livingEntity_1)
             ChopMode.SINGLE_CHOP -> maybeSwapFurthestLog(blockState_1, world_1, blockPos_1)
+            ChopMode.GRAVITY_CHOP -> treeFeller(blockState_1, world_1, blockPos_1, itemStack_1, livingEntity_1)
             ChopMode.VANILLA_CHOP -> {
             }
         }

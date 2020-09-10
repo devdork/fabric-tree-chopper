@@ -7,16 +7,17 @@ import me.sargunvohra.mcmods.autoconfig1u.annotation.ConfigEntry
 @Config(name = FabricTreeChopper.MODID)
 class FabricTreeChopperConfig : ConfigData {
     var fastLeafDecay: Boolean = true
-    var treeChopMode: ChopMode = ChopMode.SINGLE_CHOP
+    var treeChopMode: ChopMode = ChopMode.GRAVITY_CHOP
     @ConfigEntry.Gui.Tooltip
     var fullChopDurabilityUsage: FullChopDurabilityMode = FullChopDurabilityMode.BREAK_MID_CHOP
-    var sneakToDisable: Boolean = true
+    var sneakToDisable: Boolean = false
     var requireLeavesToChop: Boolean = true
 }
 
 enum class ChopMode {
     FULL_CHOP,
     SINGLE_CHOP,
+    GRAVITY_CHOP,
     VANILLA_CHOP
 }
 
