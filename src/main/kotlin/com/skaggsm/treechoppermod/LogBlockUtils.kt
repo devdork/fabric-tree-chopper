@@ -11,9 +11,11 @@ import net.minecraft.item.ItemStack
 import net.minecraft.util.math.BlockPos
 import net.minecraft.block.FallingBlock
 import net.minecraft.entity.FallingBlockEntity
+import net.minecraft.util.math.Direction
 import net.minecraft.util.math.Vec3i
 import net.minecraft.world.World
 import kotlin.math.abs
+import net.minecraft.state.property.Properties
 
 private val BlockState.isNaturalLeaf: Boolean
     get() {
@@ -173,15 +175,15 @@ fun calculateFallOffset(basePos: BlockPos, logPos: BlockPos, signDir: SignDirect
     val heightDifference = logPos.y - basePos.y
     val newPos = if (signDir == SignDirection.Pos) {
         if (faceDir == FaceDirection.Z) {
-            Vec3i(logPos.x, basePos.y + 1, basePos.z + heightDifference)
+            Vec3i(logPos.x, basePos.y + heightDifference, basePos.z + heightDifference)
         } else {
-            Vec3i(basePos.x + heightDifference, basePos.y + 1, logPos.z)
+            Vec3i(basePos.x + heightDifference, basePos.y + heightDifference, logPos.z)
         }
     } else {
         if (faceDir == FaceDirection.Z) {
-            Vec3i(logPos.x, basePos.y + 1, basePos.z - heightDifference)
+            Vec3i(logPos.x, basePos.y + heightDifference, basePos.z - heightDifference)
         } else {
-            Vec3i(basePos.x - heightDifference, basePos.y + 1, logPos.z)
+            Vec3i(basePos.x - heightDifference, basePos.y + heightDifference, logPos.z)
         }
     }
     return newPos
@@ -193,10 +195,16 @@ fun treeFeller(originalBlockState: BlockState, world: World, blockPos: BlockPos,
     for (log in logs) {
         world.breakBlock(log, false)
         val newPos = calculateFallOffset(blockPos, log, sign, face)
-        // val newBlockState = ...
-        // TODO: change the BlockState so that the "face" property is set to the value contained in face
+        val newBlockState = if (face == FaceDirection.Z) {
+            originalBlockState.with(Properties.AXIS, Direction.Axis.Z)
+        } else {
+            originalBlockState.with(Properties.AXIS, Direction.Axis.X)
+        }
         // TODO: spawn an entity of a correctly faced (BlockState fixed) log at the position provided by newPos
-        //world.spawnEntity(FallingBlockEntity(world, newPos.x.toDouble(), newPos.y.toDouble(), newPos.z.toDouble(), newBlockState))
+        println(originalBlockState)
+        println(newPos)
+        print(newBlockState)
+        world.spawnEntity(FallingBlockEntity(world, newPos.x.toDouble() + 0.5, newPos.y.toDouble() + 0.5, newPos.z.toDouble() + 0.5, newBlockState))
     }
 }
 
