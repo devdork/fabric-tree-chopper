@@ -153,7 +153,7 @@ fun getFaceDirection(livingEntity: LivingEntity, blockPos: BlockPos): Pair<SignD
     val aZ = abs(z)
     val direction: FaceDirection
     val sign: SignDirection
-    if (aX > aZ) {
+    if (aZ > aX) {
         direction = FaceDirection.Z
         sign = if (blockPos.z > livingEntity.pos.z) {
             SignDirection.Pos
@@ -200,11 +200,15 @@ fun treeFeller(originalBlockState: BlockState, world: World, blockPos: BlockPos,
         } else {
             originalBlockState.with(Properties.AXIS, Direction.Axis.X)
         }
-        // TODO: spawn an entity of a correctly faced (BlockState fixed) log at the position provided by newPos
+        // TODO: Remove the leaves from the tree being cut down.
+        // TODO: Modify the mixiins to allow hand-usage or use a callback(?)
+        // TODO: Make it so that you have to cut through the entire trunk of a 2x2 or such tree to cut it down.
         println(originalBlockState)
         println(newPos)
         print(newBlockState)
-        world.spawnEntity(FallingBlockEntity(world, newPos.x.toDouble() + 0.5, newPos.y.toDouble() + 0.5, newPos.z.toDouble() + 0.5, newBlockState))
+        var fallerBlock = FallingBlockEntity(world, newPos.x.toDouble() + 0.5, newPos.y.toDouble() + 0.5, newPos.z.toDouble() + 0.5, newBlockState)
+        fallerBlock.timeFalling = 1
+        world.spawnEntity(fallerBlock)
     }
 }
 
